@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/banner.svg" alt="Last Epoch Offline Fixes — portals, seasonal encounters and cosmetics" width="100%"></p>
+<p align="center"><img src="assets/banner.svg?v=b22b834" alt="Last Epoch Offline Fixes — portals, seasonal encounters and cosmetics" width="100%"></p>
 
 <p align="center">
  <img src="https://img.shields.io/badge/Last_Epoch-1.5.1-c99161?style=flat-square" alt="Last Epoch 1.5.1">
