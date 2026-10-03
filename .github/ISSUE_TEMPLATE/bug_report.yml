@@ -1,0 +1,46 @@
+name: Bug report / Сообщение об ошибке
+description: Report offline behavior, installation or cosmetic persistence issues.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Please keep personal data, inventory caches, saves and game binaries private. English or Russian is welcome."
+  - type: input
+    id: version
+    attributes:
+      label: Game version and build / Версия и сборка
+      placeholder: 1.5.1 / 25672295
+    validations:
+      required: true
+  - type: textarea
+    id: hash
+    attributes:
+      label: DLL hash and installer status / Хеш DLL и статус
+      description: Run Install.ps1 -Check. Remove your local path from the output.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected feature / Что не работает
+      options:
+        - Town portal / Телепорт
+        - Seasonal encounter / Сезонное событие
+        - Cosmetic equipment / Косметика экипировки
+        - Skill appearance / Эффект навыка
+        - Installer or rollback / Установка или откат
+        - Other / Другое
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps / Шаги воспроизведения
+      description: Include offline launch method, fresh area or existing encounter, and expected vs actual behavior. For cosmetics, is the item already visible in your cached inventory?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant sanitized log excerpt / Фрагмент журнала без личных данных
+      render: text
