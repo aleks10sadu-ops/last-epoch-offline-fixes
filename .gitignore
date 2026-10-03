@@ -1,0 +1,11 @@
+*.dll
+*.exe
+*.log
+*.jsonl
+*.zip
+*.tmp
+__pycache__/
+Saves/
+.le-offline-fixes/
+private/
+test-results/
