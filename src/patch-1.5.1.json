@@ -1,0 +1,68 @@
+{
+  "original_sha256": "502E32F1F31BC1979AC6C387FAEF1266A62AD29F5B573E6D9B51CB577A72F5F8",
+  "previous_patched_sha256": "E030B35FE5D42FB384BDD749AD3D7CDCDA53D2C48BBD4D1760C92E75D2C6D916",
+  "patched_sha256": "3A3723A4788160D10FC1A779A6CE0734C33064940A13463952DF096EA724695E",
+  "original_length": 97185280,
+  "patched_length": 100621824,
+  "changes": [
+    {
+      "offset": 30054060,
+      "before": "e8cf940600",
+      "after": "e84f932d04"
+    },
+    {
+      "offset": 33405163,
+      "before": "0f84df020000",
+      "after": "0f84cc020000"
+    },
+    {
+      "offset": 33405234,
+      "before": "0f8498020000",
+      "after": "0f8485020000"
+    },
+    {
+      "offset": 840,
+      "before": "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "after": "2e6c6566697800003c6e34000040f8050070340000eeca0500000000000000000000000020000060"
+    },
+    {
+      "offset": 302,
+      "before": "0700",
+      "after": "0800"
+    },
+    {
+      "offset": 376,
+      "before": "0040f805",
+      "after": "00b02c06"
+    },
+    {
+      "offset": 324,
+      "before": "00dc5504",
+      "after": "004c8a04"
+    },
+    {
+      "offset": 456,
+      "before": "0030ab05",
+      "after": "c040f805"
+    },
+    {
+      "offset": 460,
+      "before": "706d3400",
+      "after": "7c6d3400"
+    },
+    {
+      "offset": 384,
+      "before": "00000000",
+      "after": "85240006"
+    }
+  ],
+  "schema": 1,
+  "game_version": "1.5.1",
+  "build": "25672295",
+  "append_prefix_hex": "4883ec484d85c0740b41837810000f859200000048894c242048895424284c894c2430488d0df6a332ffe831e536fa488d0da23d31ffe825e536fa488d0da63b31ffe819e536fa488d0d61000000e82dca3bfa4c8bc0488b4c2420488b5424284c8b4c24304885d27406837a10007507488b15a9a332ff4d85c97407418379100075074c8b0d4e3d31ff488b4424704885c0740683781000750c488b05473b31ff48894424704883c448e9d100d9fb3333373137330000000104010004820000",
+  "exception_table_offset": 92142080,
+  "exception_table_size": 3435888,
+  "exception_function_hex": "0040f805af40f805b840f805",
+  "append_offset": 97185280,
+  "append_alignment": 512
+}
