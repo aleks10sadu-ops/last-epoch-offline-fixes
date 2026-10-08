@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$OriginalDll)
+param([string]$OriginalDll, [string]$GameVersion = '1.5.1')
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $repository = Split-Path $PSScriptRoot -Parent
@@ -86,7 +86,7 @@ try {
         & $module { param($Value) $script:TestManifest = $Value } $Manifest
         Install-OfflineFix $folder
         Assert-True ((Get-FixStatus $folder).Status -eq 'installed') 'Installation did not produce the supported patched hash.'
-        $backup = Join-Path $folder '.le-offline-fixes\GameAssembly.original.dll'
+        $backup = Join-Path $folder ('.le-offline-fixes\GameAssembly.' + $Manifest.original_sha256 + '.original.dll')
         Assert-True ((Get-FileHash -LiteralPath $backup).Hash -eq $Manifest.original_sha256) 'Original backup was not preserved.'
         Install-OfflineFix $folder
         Assert-True ((Get-FileHash -LiteralPath $backup).Hash -eq $Manifest.original_sha256) 'Repeated installation damaged the backup.'
@@ -113,7 +113,7 @@ try {
 
     Test-Transactions $source $fixture 'synthetic'
     if ($OriginalDll) {
-        $realManifest = Get-Content -LiteralPath (Join-Path $repository 'src\patch-1.5.1.json') -Raw | ConvertFrom-Json
+        $realManifest = Get-Content -LiteralPath (Join-Path $repository "src\patch-$GameVersion.json") -Raw | ConvertFrom-Json
         [byte[]]$realOriginal = [IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $OriginalDll).ProviderPath)
         [byte[]]$realPatched = New-PatchedBytes $realOriginal $realManifest
         Assert-True ((Get-BytesHash $realPatched) -eq $realManifest.patched_sha256) 'Real patched hash does not match the game-validated DLL.'

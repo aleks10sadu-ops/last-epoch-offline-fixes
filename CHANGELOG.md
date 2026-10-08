@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 — 2026-10-08
+
+- Add the exact Windows x64 1.5.2 build; the local tester reported the offline fixes working.
+- Add guarded automatic adaptation for unlisted builds whose relevant code remains structurally identical.
+- Verify five complete normalized function fingerprints, unique matches, internal branches, constructor/initializer links, stock identity slots and PE layout before building a patch.
+- Keep per-original-hash backups, preserve matching legacy backups, and save locally generated recovery manifests for adaptive installs.
+- Add read-only `-Analyze` mode, migration tests and adaptive refusal/rollback tests.
+- Independently reproduce the previously validated 1.5.1 and 1.5.2 patched hashes with the adaptive builder.
+
+Unlisted builds remain experimental until tested in game. Structural matching cannot guarantee compatibility with every release.
+
 ## 0.1.0 — 2026-10-03
 
 Preview release for the exact tested Windows x64 build of Last Epoch 1.5.1.

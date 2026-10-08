@@ -1,7 +1,7 @@
-<p align="center"><img src="assets/banner.svg?v=b22b834" alt="Last Epoch Offline Fixes — portals, seasonal encounters and cosmetics" width="100%"></p>
+<p align="center"><img src="assets/banner.svg?v=adaptive-0.2.0" alt="Last Epoch Offline Fixes — portals, seasonal encounters and cosmetics" width="100%"></p>
 
 <p align="center">
- <img src="https://img.shields.io/badge/Last_Epoch-1.5.1-c99161?style=flat-square" alt="Last Epoch 1.5.1">
+ <img src="https://img.shields.io/badge/tested-1.5.1_%7C_1.5.2-c99161?style=flat-square" alt="Tested builds: 1.5.1 and 1.5.2">
  <img src="https://img.shields.io/badge/platform-Windows_x64-73c9c3?style=flat-square" alt="Windows x64">
  <img src="https://img.shields.io/badge/release-preview-e3b362?style=flat-square" alt="Preview release">
  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-9daec4?style=flat-square" alt="MIT license"></a>
@@ -12,9 +12,9 @@
 
 # Keep your offline journey moving
 
-A small community patch for **Last Epoch 1.5.1** that fixes offline identity initialization and an empty cosmetic-store cache. It addresses broken town portals, the offline seasonal encounter reward problem, and cosmetics that cannot be selected or do not survive a restart.
+A small community patch for **Last Epoch 1.5.1 and 1.5.2** that fixes offline identity initialization and an empty cosmetic-store cache. It addresses broken town portals, the offline seasonal encounter reward problem, and cosmetics that cannot be selected or do not survive a restart.
 
-**Preview release:** support is limited to one tested Windows build. Seasonal combat from start to finish still needs further validation. See [compatibility and test status](docs/compatibility.md).
+**Preview release with automatic adaptation:** known builds use verified patches. Other Windows x64 builds are analyzed locally; the installer adapts only when complete function fingerprints, control flow and required references match. Changes or ambiguous matches are refused. This does not guarantee support for every version. See [compatibility and test status](docs/compatibility.md).
 
 ## What it fixes
 
@@ -33,7 +33,7 @@ The installer changes **GameAssembly.dll** and keeps a verified original backup.
 3. Double-click **`Install.cmd`** and select **`Last Epoch.exe`** in your game folder. Wait for the green “Installed” message.
 4. Start Last Epoch normally and choose **Play Offline**.
 
-**No Python, mod loader, account login, or administrator access is required by the core installer.** Your game folder must be writable. The original DLL is saved in `GAME_FOLDER\.le-offline-fixes\GameAssembly.original.dll`.
+**No Python, mod loader, account login, or administrator access is required by the core installer.** Your game folder must be writable. Originals are backed up separately as `GAME_FOLDER\.le-offline-fixes\GameAssembly.<ORIGINAL_SHA256>.original.dll`. Matching legacy backups remain usable. Keep the entire `.le-offline-fixes` folder for rollback.
 
 <details>
 <summary><b>Prefer PowerShell? Check compatibility first.</b></summary>
@@ -45,19 +45,20 @@ Open PowerShell in the extracted folder. Replace the example path with your inst
 .\Install.ps1 -GameDirectory "D:\Games\Last Epoch"
 ```
 
-`-Check` only reads the DLL and reports its hash and status. An unsupported file is refused before installation. `Install.cmd` uses the Windows PowerShell execution-policy option for its own process; it does not change your saved system policy.
+`-Check` only reads the DLL and reports its hash and status. `adaptive-compatible` means the structural checks passed for an unlisted build; its gameplay still needs testing. `-Analyze` forces read-only function analysis on an original DLL. An unsupported file is refused before installation. `Install.cmd` uses the Windows PowerShell execution-policy option for its own process; it does not change your saved system policy.
 
 </details>
 
-### Exact build compatibility
+### Known builds and automatic adaptation
 
-Version **1.5.1**, build **25672295**, Windows x64. The original `GameAssembly.dll` must have this SHA-256:
+Known original DLLs, Windows x64:
 
 ```text
-502E32F1F31BC1979AC6C387FAEF1266A62AD29F5B573E6D9B51CB577A72F5F8
+1.5.1: 502E32F1F31BC1979AC6C387FAEF1266A62AD29F5B573E6D9B51CB577A72F5F8
+1.5.2: 5DD7563CB74CF833327BFF8C074FEBE462D2FB4F2D99CC3275E7B6EB1305EAB3
 ```
 
-The version number alone is insufficient: another platform, hotfix, or modified DLL can have different code. There is no force option. Other builds need a separately developed and tested patch.
+The version number alone is insufficient. For an unlisted DLL, the installer finds the functions, verifies their structure and connections, calculates the new patch addresses, and saves a local recovery manifest. If the game changes those functions or its PE layout, a reviewed template update is required. There is no force option. An accepted unlisted build is experimental until tested in game.
 
 ## Cosmetics
 
@@ -75,13 +76,14 @@ Close the game, double-click **`Restore.cmd`**, and select the same executable. 
 .\Restore.ps1 -GameDirectory "D:\Games\Last Epoch"
 ```
 
-Before installing a game update, restore the original. If the backup is missing, use your game launcher's file-verification feature. Do not apply this patch to a new DLL unless its hash is explicitly supported.
+Before installing a game update, restore the original. If the backup is missing, use your game launcher's file-verification feature. After updating, run the installer again so it checks the new DLL and selects or builds the matching patch.
 
 ## Troubleshooting
 
 | Message or symptom | Next step |
 | :--- | :--- |
-| **Unsupported DLL** | Confirm the build and hash. Restore other DLL mods or use a matching original installation. |
+| **Unsupported DLL** | The code or layout did not match. Restore other DLL mods, check an original installation, or report the analysis error for a reviewed update. |
+| **adaptive-compatible / Unlisted build** | Structural checks passed. Test portals, rewards, cosmetics and normal exit; report your DLL hash and results. |
 | **Close Last Epoch** | Exit the game completely, then rerun the installer. |
 | **Access denied** | Check write permissions on the game directory and extraction folder. |
 | **Already installed** | The patched hash matches; no files were changed. |

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="430" viewBox="0 0 1280 430" role="img" aria-labelledby="title desc">
- <title id="title">Last Epoch Offline Fixes</title><desc id="desc">Community fixes for Last Epoch version 1.5.1. Portals, seasonal encounters and cosmetics.</desc>
+ <title id="title">Last Epoch Offline Fixes</title><desc id="desc">Community fixes for Last Epoch 1.5.1 and 1.5.2 with guarded automatic adaptation. Portals, seasonal encounters and cosmetics.</desc>
  <defs>
   <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#081520"/><stop offset=".6" stop-color="#111827"/><stop offset="1" stop-color="#2e1720"/></linearGradient>
  </defs>
@@ -10,7 +10,7 @@
  <text x="70" y="169" fill="#f3f1e9" font-family="Segoe UI,Arial,sans-serif" font-weight="700" font-size="64">LAST EPOCH</text>
  <text x="70" y="236" fill="#f3f1e9" font-family="Segoe UI,Arial,sans-serif" font-weight="300" font-size="55">Offline Fixes</text>
  <text x="74" y="285" fill="#a8bacb" font-family="Segoe UI,Arial,sans-serif" font-size="21">Portals · Seasonal encounters · Cosmetics</text>
- <rect x="72" y="326" width="133" height="36" rx="18" fill="#183132" stroke="#3b6964"/>
- <text x="138" y="350" text-anchor="middle" fill="#a7ece5" font-family="Segoe UI,Arial,sans-serif" font-size="15">VERSION 1.5.1</text>
- <text x="228" y="350" fill="#a8bacb" font-family="Segoe UI,Arial,sans-serif" font-size="15">Local install. Original-file backup. Easy rollback.</text>
+ <rect x="72" y="326" width="185" height="36" rx="18" fill="#183132" stroke="#3b6964"/>
+ <text x="164" y="350" text-anchor="middle" fill="#a7ece5" font-family="Segoe UI,Arial,sans-serif" font-size="14">ADAPTIVE INSTALLER</text>
+ <text x="280" y="350" fill="#a8bacb" font-family="Segoe UI,Arial,sans-serif" font-size="15">Local install. Original-file backup. Easy rollback.</text>
 </svg>

@@ -1,8 +1,15 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'AdaptivePatch.ps1')
 
-function Get-FixManifest {
-    Get-Content -LiteralPath (Join-Path $PSScriptRoot 'patch-1.5.1.json') -Raw | ConvertFrom-Json
+function Get-FixManifest([string]$SHA256, [string]$GameVersion = '1.5.1') {
+    foreach ($path in Get-ChildItem -LiteralPath $PSScriptRoot -Filter 'patch-*.json' -File) {
+        $manifest = Get-Content -LiteralPath $path.FullName -Raw | ConvertFrom-Json
+        if ($SHA256) {
+            if ($SHA256 -in @($manifest.original_sha256, $manifest.patched_sha256, $manifest.previous_patched_sha256)) { return $manifest }
+        } elseif ($manifest.game_version -eq $GameVersion) { return $manifest }
+    }
+    return $null
 }
 
 function Get-BytesHash([byte[]]$Bytes) {
@@ -20,7 +27,7 @@ function ConvertFrom-Hex([string]$Hex) {
 
 function New-PatchedBytes([byte[]]$Source, $Manifest = (Get-FixManifest)) {
     if ($Source.Length -ne $Manifest.original_length -or (Get-BytesHash $Source) -ne $Manifest.original_sha256) {
-        throw 'Unsupported GameAssembly.dll. Only the exact tested 1.5.1 build is supported.'
+        throw 'Unsupported GameAssembly.dll. An exact supported build is required.'
     }
     if ($Manifest.schema -ne 1) { throw 'Unsupported patch manifest schema.' }
     [byte[]]$prefix = ConvertFrom-Hex $Manifest.append_prefix_hex
@@ -77,13 +84,35 @@ function Resolve-GameDirectory([string]$GameDirectory) {
 }
 
 function Get-FixStatus([string]$GameDirectory) {
-    $manifest = Get-FixManifest
     $hash = (Get-FileHash -LiteralPath (Join-Path $GameDirectory 'GameAssembly.dll') -Algorithm SHA256).Hash
+    $manifest = Get-ResolvedManifest $GameDirectory $hash
     $status = 'unsupported'
-    if ($hash -eq $manifest.original_sha256) { $status = 'original-supported' }
-    elseif ($hash -eq $manifest.patched_sha256) { $status = 'installed' }
-    elseif ($hash -eq $manifest.previous_patched_sha256) { $status = 'previous-development-patch' }
-    [PSCustomObject]@{ Status = $status; SHA256 = $hash; Version = $manifest.game_version }
+    $version = 'unknown'
+    $reason = ''
+    if (-not $manifest) {
+        try {
+            $manifest = Get-AdaptiveManifest ([IO.File]::ReadAllBytes((Join-Path $GameDirectory 'GameAssembly.dll')))
+            $status = 'adaptive-compatible'
+        } catch { $reason = $_.Exception.Message }
+    }
+    if ($manifest) {
+        $version = $manifest.game_version
+        if ($hash -eq $manifest.original_sha256 -and $status -ne 'adaptive-compatible') { $status = 'original-supported' }
+        elseif ($hash -eq $manifest.patched_sha256) { $status = 'installed' }
+        elseif ($hash -eq $manifest.previous_patched_sha256) { $status = 'previous-development-patch' }
+    }
+    [PSCustomObject]@{ Status = $status; SHA256 = $hash; Version = $version; Reason = $reason }
+}
+
+function Get-BackupPath([string]$GameDirectory, $Manifest) {
+    $folder = Join-Path $GameDirectory '.le-offline-fixes'
+    $versioned = Join-Path $folder ('GameAssembly.' + $Manifest.original_sha256 + '.original.dll')
+    if (Test-Path -LiteralPath $versioned) { return $versioned }
+    # Keep existing 1.5.1 installations reversible without replacing their backup.
+    $legacy = Join-Path $folder 'GameAssembly.original.dll'
+    if ((Test-Path -LiteralPath $legacy -PathType Leaf) -and
+        (Get-FileHash -LiteralPath $legacy -Algorithm SHA256).Hash -eq $Manifest.original_sha256) { return $legacy }
+    return $versioned
 }
 
 function Write-VerifiedReplacement([string]$Target, [byte[]]$Bytes, [string]$ExpectedCurrentHash, [string]$ExpectedNewHash) {
@@ -103,36 +132,41 @@ function Write-VerifiedReplacement([string]$Target, [byte[]]$Bytes, [string]$Exp
 
 function Install-OfflineFix([string]$GameDirectory) {
     Assert-GameClosed
-    $manifest = Get-FixManifest
     $target = Join-Path $GameDirectory 'GameAssembly.dll'
     $status = Get-FixStatus $GameDirectory
     if ($status.Status -eq 'installed') { Write-Host 'Already installed. No files changed.'; return }
-    if ($status.Status -ne 'original-supported') { throw "Unsupported DLL ($($status.SHA256)). Restore the original game file first. No files changed." }
+    if ($status.Status -notin @('original-supported', 'adaptive-compatible')) { throw "Unsupported DLL ($($status.SHA256)). $($status.Reason) No files changed." }
+    $manifest = Get-ResolvedManifest $GameDirectory $status.SHA256
     [byte[]]$source = [IO.File]::ReadAllBytes($target)
+    if (-not $manifest) {
+        $manifest = Get-AdaptiveManifest $source
+        Write-Host 'Unlisted build: all structural checks passed. Gameplay compatibility is not yet established.' -ForegroundColor Yellow
+    }
     [byte[]]$patched = New-PatchedBytes $source $manifest
     $backupFolder = Join-Path $GameDirectory '.le-offline-fixes'
     if (Test-Path -LiteralPath $backupFolder) {
         if ((Get-Item -LiteralPath $backupFolder).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Backup folder must not be a link.' }
     } else { New-Item -ItemType Directory -Path $backupFolder | Out-Null }
-    $backup = Join-Path $backupFolder 'GameAssembly.original.dll'
+    $backup = Get-BackupPath $GameDirectory $manifest
     if (-not (Test-Path -LiteralPath $backup)) {
         $stream = [IO.File]::Open($backup, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
         try { $stream.Write($source, 0, $source.Length) } finally { $stream.Dispose() }
     }
     if ((Get-FileHash -LiteralPath $backup -Algorithm SHA256).Hash -ne $manifest.original_sha256) { throw 'Existing backup is not the expected original DLL. It was not overwritten.' }
+    Save-AdaptiveManifest $GameDirectory $manifest
     Write-VerifiedReplacement $target $patched $manifest.original_sha256 $manifest.patched_sha256
-    Write-Host 'Installed Last Epoch 1.5.1 offline fixes.' -ForegroundColor Green
+    Write-Host "Installed Last Epoch $($manifest.game_version) offline fixes." -ForegroundColor Green
     Write-Host "Original DLL backup: $backup"
     Write-Host 'Start the game normally and choose Play Offline. Character saves were not edited.'
 }
 
 function Restore-OfflineFix([string]$GameDirectory) {
     Assert-GameClosed
-    $manifest = Get-FixManifest
     $status = Get-FixStatus $GameDirectory
-    if ($status.Status -eq 'original-supported') { Write-Host 'Already original. No files changed.'; return }
+    if ($status.Status -in @('original-supported', 'adaptive-compatible')) { Write-Host 'Already original. No files changed.'; return }
     if ($status.Status -notin @('installed', 'previous-development-patch')) { throw 'Unrecognized current DLL. Restore was refused to protect another game version or mod.' }
-    $backup = Join-Path $GameDirectory '.le-offline-fixes\GameAssembly.original.dll'
+    $manifest = Get-ResolvedManifest $GameDirectory $status.SHA256
+    $backup = Get-BackupPath $GameDirectory $manifest
     if (-not (Test-Path -LiteralPath $backup -PathType Leaf)) { throw 'Original backup not found. Use the game launcher to verify/restore game files.' }
     [byte[]]$source = [IO.File]::ReadAllBytes($backup)
     if ((Get-BytesHash $source) -ne $manifest.original_sha256) { throw 'Original backup checksum mismatch. Nothing was restored.' }
@@ -140,4 +174,4 @@ function Restore-OfflineFix([string]$GameDirectory) {
     Write-Host 'Original DLL restored. Character progress and cosmetic caches were kept.' -ForegroundColor Green
 }
 
-Export-ModuleMember -Function Get-FixManifest, Get-BytesHash, New-PatchedBytes, Resolve-GameDirectory, Get-FixStatus, Install-OfflineFix, Restore-OfflineFix
+Export-ModuleMember -Function Get-FixManifest, Get-BytesHash, New-PatchedBytes, Resolve-GameDirectory, Get-FixStatus, Install-OfflineFix, Restore-OfflineFix, Get-AdaptiveManifest

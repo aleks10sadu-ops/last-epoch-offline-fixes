@@ -1,0 +1,68 @@
+{
+  "original_sha256": "5DD7563CB74CF833327BFF8C074FEBE462D2FB4F2D99CC3275E7B6EB1305EAB3",
+  "previous_patched_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "patched_sha256": "6E3751C24130371BFF021A6F030C2ECD8236A767A3A7872908AAB6EDD18CCDE2",
+  "original_length": 97220096,
+  "patched_length": 100657664,
+  "changes": [
+    {
+      "offset": 30072732,
+      "before": "e83f9b0600",
+      "after": "e85fde2d04"
+    },
+    {
+      "offset": 33516443,
+      "before": "0f84df020000",
+      "after": "0f84cc020000"
+    },
+    {
+      "offset": 33516514,
+      "before": "0f8498020000",
+      "after": "0f8485020000"
+    },
+    {
+      "offset": 848,
+      "before": "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "after": "2e6c6566697800008072340000d0f805007434000076cb0500000000000000000000000020000060"
+    },
+    {
+      "offset": 310,
+      "before": "0700",
+      "after": "0800"
+    },
+    {
+      "offset": 384,
+      "before": "00d0f805",
+      "after": "00502d06"
+    },
+    {
+      "offset": 332,
+      "before": "004e5604",
+      "after": "00c28a04"
+    },
+    {
+      "offset": 464,
+      "before": "00b0ab05",
+      "after": "c0d0f805"
+    },
+    {
+      "offset": 468,
+      "before": "b4713400",
+      "after": "c0713400"
+    },
+    {
+      "offset": 392,
+      "before": "00000000",
+      "after": "16800006"
+    }
+  ],
+  "schema": 1,
+  "game_version": "1.5.2",
+  "build": "local-build-157a8290bdc30455987bf5ceb9ed4081f1c703b2",
+  "append_prefix_hex": "4883ec484d85c0740b41837810000f859200000048894c242048895424284c894c2430488d0d66e632ffe8e15736fa488d0de28531ffe8d55736fa488d0de68331ffe8c95736fa488d0d61000000e8dd3c3bfa4c8bc0488b4c2420488b5424284c8b4c24304885d27406837a10007507488b1519e632ff4d85c97407418379100075074c8b0d8e8531ff488b4424704885c0740683781000750c488b05878331ff48894424704883c448e931bcd8fb3333373137330000000104010004820000",
+  "exception_table_offset": 92175872,
+  "exception_table_size": 3436980,
+  "exception_function_hex": "00d0f805afd0f805b8d0f805",
+  "append_offset": 97220096,
+  "append_alignment": 512
+}
